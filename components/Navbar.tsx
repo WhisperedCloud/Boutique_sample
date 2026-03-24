@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Menu, X, User } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const Navbar = () => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -17,7 +19,7 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
+
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Shop", path: "/shop" },
@@ -28,11 +30,10 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
-        scrolled 
-          ? "glass py-2 border-white/10 shadow-lg" 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${scrolled
+          ? "glass py-2 border-white/10 shadow-lg"
           : "bg-transparent py-4 border-transparent"
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -41,19 +42,34 @@ const Navbar = () => {
               BOUTIQUE
             </Link>
           </div>
-          
+
           <div className="hidden md:flex items-center gap-12">
             <div className="flex items-center space-x-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.path}
-                  className="text-xs uppercase tracking-[0.2em] font-medium hover:text-luxury-pink transition-colors relative group"
-                >
-                  {item.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-luxury-gold transition-all group-hover:w-full" />
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                // Robust active state check
+                const normalizedPathname = pathname?.replace(/\/$/, "") || "/";
+                const normalizedItemPath = item.path.replace(/\/$/, "") || "/";
+                const isActive = normalizedPathname === normalizedItemPath;
+                
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.path}
+                    className={`text-xs uppercase tracking-[0.2em] transition-colors relative py-2 group ${
+                      isActive 
+                        ? "text-luxury-pink font-bold" 
+                        : "text-foreground/70 font-medium hover:text-luxury-pink"
+                    }`}
+                  >
+                    {item.name}
+                    <span className={
+                      `absolute -bottom-1 left-0 h-[2px] bg-luxury-pink transition-all duration-300 ${
+                        isActive ? "w-full opacity-100 shadow-[0_0_10px_rgba(245,182,200,0.5)]" : "w-0 opacity-0 group-hover:w-full group-hover:opacity-100"
+                      }`
+                    } />
+                  </Link>
+                );
+              })}
             </div>
             <ThemeToggle />
           </div>
@@ -75,16 +91,24 @@ const Navbar = () => {
           className="md:hidden bg-background/90 backdrop-blur-lg border-b border-white/10"
         >
           <div className="px-4 pt-2 pb-6 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.path}
-                className="block px-3 py-4 text-base font-medium hover:text-luxury-pink"
-                onClick={() => setIsOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const normalizedPathname = pathname?.replace(/\/$/, "") || "/";
+              const normalizedItemPath = item.path.replace(/\/$/, "") || "/";
+              const isActive = normalizedPathname === normalizedItemPath;
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.path}
+                  className={`block px-3 py-4 text-base transition-colors ${
+                    isActive ? "text-luxury-pink font-bold" : "text-foreground/70 font-medium hover:text-luxury-pink"
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
           </div>
         </motion.div>
       )}

@@ -2,14 +2,23 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const Loader = () => {
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Only show loader on home page
+    if (pathname !== "/") {
+      setLoading(false);
+      return;
+    }
     const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [pathname]);
+
+  if (pathname !== "/" && !loading) return null;
 
   return (
     <AnimatePresence>
